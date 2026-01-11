@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeradorDados Pro | Console Avançado de Geração</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --sidebar: #1e293b;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --field-bg: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --sidebar: #020617;
+            --card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --field-bg: #0f172a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #38bdf8;
+        }
+
+        .nav-group { margin-bottom: 25px; }
+        .nav-label { font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; display: block; }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            color: #cbd5e1;
+        }
+
+        .nav-item:hover { background: #334155; color: white; }
+        .nav-item.active { background: var(--primary); color: white; }
+
+        /* Main Content */
+        .main-content { margin-left: 260px; padding: 40px; flex: 1; max-width: 1200px; }
+
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; }
+
+        .controls-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+        .input-group input, .input-group select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--field-bg);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--field-bg); }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            height: fit-content;
+        }
+
+        .card h3 { margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+        .data-list { display: flex; flex-direction: column; gap: 15px; }
+        .data-item {
+            padding: 20px;
+            background: var(--field-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .grid-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+
+        .field { cursor: pointer; padding: 5px; border-radius: 4px; }
+        .field:hover { background: rgba(37, 99, 235, 0.05); }
+        .field label { display: block; font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+        .field span { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; word-break: break-all; color: var(--text-main); }
+
+        .badge {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--primary);
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .address-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border);
+        }
+
+        /* Theme Toggle */
+        .theme-switch {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            display: none;
+            animation: fadeIn 0.3s;
+            z-index: 1000;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar span, .nav-label { display: none; }
+            .main-content { margin-left: 70px; padding: 20px; }
+            .controls-card { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <aside class="sidebar">
+        <div class="logo">🚀 <span>GeradorDados</span></div>
+        <nav class="nav-group">
+            <span class="nav-label">Configurações</span>
+            <div class="nav-item active" onclick="setMode('PF', this)">👤 <span>Pessoa Física</span></div>
+            <div class="nav-item" onclick="setMode('PJ', this)">🏢 <span>Pessoa Jurídica</span></div>
+        </nav>
+        <nav class="nav-group" style="margin-top: auto;">
+            <span class="nav-label">Histórico</span>
+            <div id="history-list" style="font-size: 0.8rem; color: #94a3b8;">Nenhum registro</div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div>
+                <h1 id="title">Pessoa Física</h1>
+                <p style="color: var(--text-muted)">Geração de dados sintéticos em massa</p>
+            </div>
+            <button class="theme-switch" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span> <span id="theme-text">Modo Escuro</span>
+            </button>
+        </header>
+
+        <section class="controls-card">
+            <div class="input-group">
+                <label>Quantidade</label>
+                <input type="number" id="qty" value="1" min="1" max="50" style="width: 80px;">
+            </div>
+            <button class="btn btn-primary" onclick="generateBatch()">⚡ GERAR DADOS</button>
+            <div style="flex: 1;"></div>
+            <button class="btn btn-outline" onclick="exportData('json')">📦 Exportar JSON</button>
+            <button class="btn btn-outline" onclick="exportData('csv')">📄 Exportar CSV</button>
+        </section>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Resultados Gerados <span id="res-count" class="badge">0 itens</span></h3>
+                <div id="results-container" class="data-list">
+                    <p style="color: var(--text-muted); text-align: center; padding: 40px;">Clique em gerar para começar</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="toast">Copiado!</div>
+
+    <script>
+        let mode = 'PF';
+        let currentData = [];
+        
+        const nomes = ["Ana", "Bruno", "Carla", "Daniel", "Eduarda", "Felipe", "Gabriela", "Henrique", "Isabela", "João", "Karina", "Lucas", "Mariana", "Nicolas", "Olívia", "Pedro", "Raquel", "Samuel", "Tatiana", "Vitor", "Alice", "Bernardo", "Camila", "Diego", "Elena", "Fernando", "Giovanna", "Hugo", "Igor", "Julia"];
+        const sobrenomes = ["Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves", "Pereira", "Lima", "Gomes", "Costa", "Ribeiro", "Martins", "Carvalho", "Almeida", "Lopes", "Soares", "Fernandes", "Vieira", "Barbosa", "Rocha", "Dias", "Nascimento", "Andrade", "Moreira", "Nunes", "Marques", "Machado", "Mendes", "Freitas"];
+        const empresasPrefix = ["Global", "Tech", "Nova", "Prime", "Master", "Mega", "Ultra", "Smart", "Eco", "Bio", "Soft", "Data", "Net", "Sky", "Blue", "Red", "Gold", "Silver", "Elite", "Alpha"];
+        const empresasSuffix = ["Sistemas", "Soluções", "Consultoria", "Logística", "Varejo", "Indústria", "Serviços", "Tecnologia", "Empreendimentos", "Participações", "Brasil", "Digital", "Inovação", "Group", "Partners"];
+        const dominios = ["gmail.com", "outlook.com", "hotmail.com", "yahoo.com.br", "empresa.com.br", "teste.com.br"];
+        
+        const baseEnderecos = [
+            { cep: "01310100", logradouro: "Avenida Paulista", bairro: "Bela Vista", localidade: "São Paulo", uf: "SP" },
+            { cep: "20040002", logradouro: "Avenida Rio Branco", bairro: "Centro", localidade: "Rio de Janeiro", uf: "RJ" },
+            { cep: "30140061", logradouro: "Rua dos Aimorés", bairro: "Funcionários", localidade: "Belo Horizonte", uf: "MG" },
+            { cep: "70040010", logradouro: "Esplanada dos Ministérios", bairro: "Zona Cívico-Administrativa", localidade: "Brasília", uf: "DF" },
+            { cep: "40026280", logradouro: "Largo do Pelourinho", bairro: "Centro Histórico", localidade: "Salvador", uf: "BA" },
+            { cep: "60060390", logradouro: "Rua dos Tabajaras", bairro: "Praia de Iracema", localidade: "Fortaleza", uf: "CE" },
+            { cep: "80010010", logradouro: "Rua XV de Novembro", bairro: "Centro", localidade: "Curitiba", uf: "PR" },
+            { cep: "90010001", logradouro: "Avenida Mauá", bairro: "Centro Histórico", localidade: "Porto Alegre", uf: "RS" }
+        ];
+
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            document.getElementById('theme-icon').innerText = isDark ? '🌙' : '☀️';
+            document.getElementById('theme-text').innerText = isDark ? 'Modo Escuro' : 'Modo Claro';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+        if(localStorage.getItem('theme') === 'dark') toggleTheme();
+
+        function setMode(newMode, el) {
+            mode = newMode;
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('title').innerText = mode === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica';
+        }
+
+        const calcDV = (b, p) => {
+            let s = 0;
+            for(let i=0; i<b.length; i++) s += b[i]*p[i];
+            let r = s % 11;
+            return r < 2 ? 0 : 11 - r;
+        };
+
+        function getCPF() {
+            let n = Array.from({length:9}, () => Math.floor(Math.random()*9));
+            n.push(calcDV(n, [10,9,8,7,6,5,4,3,2]));
+            n.push(calcDV(n, [11,10,9,8,7,6,5,4,3,2]));
+            return n.join('').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        }
+
+        function getCNPJ() {
+            let n = Array.from({length:8}, () => Math.floor(Math.random()*9)).concat([0,0,0,1]);
+            n.push(calcDV(n, [5,4,3,2,9,8,7,6,5,4,3,2]));
+            n.push(calcDV(n, [6,5,4,3,2,9,8,7,6,5,4,3,2]));
+            return n.join('').replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+        }
+
+        function getPhone() {
+            const ddds = [11, 21, 31, 41, 51, 61, 71, 81];
+            const ddd = ddds[Math.floor(Math.random() * ddds.length)];
+            return `(${ddd}) 9${Math.floor(1000 + Math.random()*8999)}-${Math.floor(1000 + Math.random()*8999)}`;
+        }
+
+        function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function generateEmail(nome) {
+            const clean = nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '.');
+            return `${clean}${Math.floor(Math.random()*99)}@${getRandom(dominios)}`;
+        }
+
+        async function generateOne() {
+            const baseEnd = getRandom(baseEnderecos);
+            let item = { id: Date.now() + Math.random(), tipo: mode };
+            
+            if(mode === 'PF') {
+                item.nome = getRandom(nomes) + " " + getRandom(sobrenomes) + " " + getRandom(sobrenomes);
+                item.documento = getCPF();
+                item.rg = `${Math.floor(Math.random()*99)}.${Math.floor(Math.random()*999)}.${Math.floor(Math.random()*999)}-${Math.floor(Math.random()*9)}`;
+            } else {
+                item.fantasia = getRandom(empresasPrefix) + " " + getRandom(empresasSuffix);
+                item.nome = item.fantasia + " " + getRandom(["LTDA", "S.A.", "MEI"]);
+                item.documento = getCNPJ();
+                item.ie = Math.floor(Math.random()*999999999).toString();
+            }
+
+            item.email = generateEmail(item.nome.split(' ')[0] + (item.fantasia ? '' : ' ' + item.nome.split(' ')[1]));
+            item.telefone = getPhone();
+            
+            // Endereço Detalhado
+            item.cep = baseEnd.cep;
+            item.logradouro = baseEnd.logradouro;
+            item.numero = Math.floor(Math.random() * 2000) + 1;
+            item.bairro = baseEnd.bairro;
+            item.cidade = baseEnd.localidade;
+            item.uf = baseEnd.uf;
+            
+            return item;
+        }
+
+        async function generateBatch() {
+            const qty = parseInt(document.getElementById('qty').value) || 1;
+            const container = document.getElementById('results-container');
+            container.innerHTML = "Gerando...";
+            currentData = [];
+
+            for(let i=0; i<qty; i++) {
+                currentData.push(await generateOne());
+            }
+
+            renderResults();
+            updateHistory();
+        }
+
+        function renderResults() {
+            const container = document.getElementById('results-container');
+            document.getElementById('res-count').innerText = `${currentData.length} itens`;
+            
+            if(currentData.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px;">Nenhum dado gerado</p>';
+                return;
+            }
+
+            container.innerHTML = currentData.map(item => `
+                <div class="data-item">
+                    <div class="field" onclick="copy('${item.nome}')">
+                        <label>${item.tipo === 'PF' ? 'Nome Completo' : 'Razão Social'}</label>
+                        <span style="font-weight: 700; color: var(--primary); font-size: 1rem;">${item.nome}</span>
+                    </div>
+                    
+                    <div class="grid-fields">
+                        <div class="field" onclick="copy('${item.documento}')">
+                            <label>${item.tipo === 'PF' ? 'CPF' : 'CNPJ'}</label>
+                            <span>${item.documento}</span>
+                        </div>
+                        <div class="field" onclick="copy('${item.email}')">
+                            <label>E-mail</label>
+                            <span>${item.email}</span>
+                        </div>
+                        <div class="field" onclick="copy('${item.telefone}')">
+                            <label>Telefone</label>
+                            <span>${item.telefone}</span>
+                        </div>
+                        ${item.tipo === 'PF' ? `
+                        <div class="field" onclick="copy('${item.rg}')">
+                            <label>RG</label>
+                            <span>${item.rg}</span>
+                        </div>` : `
+                        <div class="field" onclick="copy('${item.ie}')">
+                            <label>Inscrição Estadual</label>
+                            <span>${item.ie}</span>
+                        </div>`}
+                    </div>
+
+                    <div class="address-section">
+                        <label style="font-size: 0.7rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; display: block;">ENDEREÇO DETALHADO</label>
+                        <div class="grid-fields" style="margin-top: 5px;">
+                            <div class="field" onclick="copy('${item.cep}')">
+                                <label>CEP</label>
+                                <span>${item.cep}</span>
+                            </div>
+                            <div class="field" onclick="copy('${item.logradouro}')">
+                                <label>Logradouro</label>
+                                <span>${item.logradouro}</span>
+                            </div>
+                            <div class="field" onclick="copy('${item.numero}')">
+                                <label>Número</label>
+                                <span>${item.numero}</span>
+                            </div>
+                            <div class="field" onclick="copy('${item.bairro}')">
+                                <label>Bairro</label>
+                                <span>${item.bairro}</span>
+                            </div>
+                            <div class="field" onclick="copy('${item.cidade}')">
+                                <label>Cidade</label>
+                                <span>${item.cidade}</span>
+                            </div>
+                            <div class="field" onclick="copy('${item.uf}')">
+                                <label>UF</label>
+                                <span>${item.uf}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateHistory() {
+            const history = JSON.parse(localStorage.getItem('sinte_history') || '[]');
+            const newEntry = { 
+                time: new Date().toLocaleTimeString(), 
+                tipo: mode, 
+                qty: currentData.length,
+                data: currentData 
+            };
+            history.unshift(newEntry);
+            const limited = history.slice(0, 5);
+            localStorage.setItem('sinte_history', JSON.stringify(limited));
+            
+            document.getElementById('history-list').innerHTML = limited.map((h, idx) => `
+                <div style="padding: 8px; border-bottom: 1px solid #334155; cursor: pointer;" onclick="loadHistory(${idx})">
+                    ${h.time} - ${h.tipo} (${h.qty})
+                </div>
+            `).join('');
+        }
+
+        function loadHistory(idx) {
+            const history = JSON.parse(localStorage.getItem('sinte_history') || '[]');
+            currentData = history[idx].data;
+            renderResults();
+        }
+
+        function copy(txt) {
+            navigator.clipboard.writeText(txt);
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 1500);
+        }
+
+        function exportData(format) {
+            if(currentData.length === 0) return alert("Gere dados primeiro!");
+            
+            let content = "";
+            let type = "";
+            let filename = `sinte_data_${Date.now()}`;
+
+            if(format === 'json') {
+                content = JSON.stringify(currentData, null, 2);
+                type = "application/json";
+                filename += ".json";
+            } else {
+                const headers = Object.keys(currentData[0]).join(",");
+                const rows = currentData.map(obj => Object.values(obj).join(",")).join("\n");
+                content = headers + "\n" + rows;
+                type = "text/csv";
+                filename += ".csv";
+            }
+
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+    </script>
+</body>
+</html>
