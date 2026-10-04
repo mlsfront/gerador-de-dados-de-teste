@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeradorDados Pro | Console Avançado de Geração</title>
     <style>
@@ -240,10 +241,20 @@
                 <label>Quantidade</label>
                 <input type="number" id="qty" value="1" min="1" max="50" style="width: 80px;">
             </div>
+            <div class="input-group">
+                <label>Região (Endereço)</label>
+                <select id="regiao" style="width: 160px;">
+                    <option value="TODAS">Todas (Aleatório)</option>
+                    <option value="NORTE_NORDESTE">Norte / Nordeste</option>
+                    <option value="CENTRO_OESTE">Centro-Oeste</option>
+                    <option value="SUL_SUDESTE">Sul / Sudeste</option>
+                </select>
+            </div>
             <button class="btn btn-primary" onclick="generateBatch()">⚡ GERAR DADOS</button>
             <div style="flex: 1;"></div>
             <button class="btn btn-outline" onclick="exportData('json')">📦 Exportar JSON</button>
             <button class="btn btn-outline" onclick="exportData('csv')">📄 Exportar CSV</button>
+            <button class="btn btn-outline" style="border-color: #ef4444; color: #ef4444;" onclick="clearAllData()">🗑️ Limpar Tudo</button>
         </section>
 
         <div class="dashboard-grid">
@@ -262,22 +273,72 @@
         let mode = 'PF';
         let currentData = [];
         
-        const nomes = ["Ana", "Bruno", "Carla", "Daniel", "Eduarda", "Felipe", "Gabriela", "Henrique", "Isabela", "João", "Karina", "Lucas", "Mariana", "Nicolas", "Olívia", "Pedro", "Raquel", "Samuel", "Tatiana", "Vitor", "Alice", "Bernardo", "Camila", "Diego", "Elena", "Fernando", "Giovanna", "Hugo", "Igor", "Julia"];
-        const sobrenomes = ["Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves", "Pereira", "Lima", "Gomes", "Costa", "Ribeiro", "Martins", "Carvalho", "Almeida", "Lopes", "Soares", "Fernandes", "Vieira", "Barbosa", "Rocha", "Dias", "Nascimento", "Andrade", "Moreira", "Nunes", "Marques", "Machado", "Mendes", "Freitas"];
-        const empresasPrefix = ["Global", "Tech", "Nova", "Prime", "Master", "Mega", "Ultra", "Smart", "Eco", "Bio", "Soft", "Data", "Net", "Sky", "Blue", "Red", "Gold", "Silver", "Elite", "Alpha"];
-        const empresasSuffix = ["Sistemas", "Soluções", "Consultoria", "Logística", "Varejo", "Indústria", "Serviços", "Tecnologia", "Empreendimentos", "Participações", "Brasil", "Digital", "Inovação", "Group", "Partners"];
+        const nomes = [
+            "Ana", "Bruno", "Carla", "Daniel", "Eduarda", "Felipe", "Gabriela", "Henrique", "Isabela", "João", 
+            "Karina", "Lucas", "Mariana", "Nicolas", "Olívia", "Pedro", "Raquel", "Samuel", "Tatiana", "Vitor", 
+            "Alice", "Bernardo", "Camila", "Diego", "Elena", "Fernando", "Giovanna", "Hugo", "Igor", "Julia",
+            "Gabriel", "Mateus", "Lucas", "Guilherme", "Gustavo", "Vinicius", "Rodrigo", "Thiago", "Marcos", "Andre",
+            "Larissa", "Letícia", "Beatriz", "Yasmin", "Amanda", "Rebeca", "Luana", "Fernanda", "Renata", "Juliana",
+            "Arthur", "Heitor", "Davi", "Lorenzo", "Theo", "Miguel", "Enzo", "Valentina", "Helena", "Sophia",
+            "Manuela", "Laura", "Cecília", "Lorena", "Lívia", "Antonella", "Heloísa", "Maitê", "Aline", "Fábio"
+        ];
+        const sobrenomes = [
+            "Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves", "Pereira", "Lima", "Gomes", 
+            "Costa", "Ribeiro", "Martins", "Carvalho", "Almeida", "Lopes", "Soares", "Fernandes", "Vieira", "Barbosa", 
+            "Rocha", "Dias", "Nascimento", "Andrade", "Moreira", "Nunes", "Marques", "Machado", "Mendes", "Freitas",
+            "Cardoso", "Teixeira", "Ramos", "Borges", "Santana", "Melo", "Fonseca", "Pinto", "Cavalcanti", "Araujo",
+            "Pinheiro", "Castro", "Macedo", "Neves", "Cruz", "Roque", "Campos", "Cunha", "Azevedo", "Tavares", 
+            "Sales", "Guerra", "Siqueira", "Guedes", "Morais", "Reis", "Nogueira"
+        ];
+        const empresasPrefix = [
+            "Global", "Tech", "Nova", "Prime", "Master", "Mega", "Ultra", "Smart", "Eco", "Bio", "Soft", "Data", 
+            "Net", "Sky", "Blue", "Red", "Gold", "Silver", "Elite", "Alpha", "Apex", "Vertex", "Nexus", "Quantum", 
+            "Infinity", "Aero", "Maximus", "Vanguard", "Summit", "Fusion", "Synergy", "Horizon", "Orion", "Vector"
+        ];
+        const empresasSuffix = [
+            "Sistemas", "Soluções", "Consultoria", "Logística", "Varejo", "Indústria", "Serviços", "Tecnologia", 
+            "Empreendimentos", "Participações", "Brasil", "Digital", "Inovação", "Group", "Partners", "Comércio",
+            "Distribuidora", "Alimentos", "Engenharia", "Finanças", "Investimentos", "Comunicações", "Energia", "Labs"
+        ];
         const dominios = ["gmail.com", "outlook.com", "hotmail.com", "yahoo.com.br", "empresa.com.br", "teste.com.br"];
         
-        const baseEnderecos = [
-            { cep: "01310100", logradouro: "Avenida Paulista", bairro: "Bela Vista", localidade: "São Paulo", uf: "SP" },
-            { cep: "20040002", logradouro: "Avenida Rio Branco", bairro: "Centro", localidade: "Rio de Janeiro", uf: "RJ" },
-            { cep: "30140061", logradouro: "Rua dos Aimorés", bairro: "Funcionários", localidade: "Belo Horizonte", uf: "MG" },
-            { cep: "70040010", logradouro: "Esplanada dos Ministérios", bairro: "Zona Cívico-Administrativa", localidade: "Brasília", uf: "DF" },
-            { cep: "40026280", logradouro: "Largo do Pelourinho", bairro: "Centro Histórico", localidade: "Salvador", uf: "BA" },
-            { cep: "60060390", logradouro: "Rua dos Tabajaras", bairro: "Praia de Iracema", localidade: "Fortaleza", uf: "CE" },
-            { cep: "80010010", logradouro: "Rua XV de Novembro", bairro: "Centro", localidade: "Curitiba", uf: "PR" },
-            { cep: "90010001", logradouro: "Avenida Mauá", bairro: "Centro Histórico", localidade: "Porto Alegre", uf: "RS" }
-        ];
+        const baseEnderecos = {
+            NORTE_NORDESTE: [
+                { cep: "40026280", logradouro: "Largo do Pelourinho", bairro: "Centro Histórico", localidade: "Salvador", uf: "BA" },
+                { cep: "60060390", logradouro: "Rua dos Tabajaras", bairro: "Praia de Iracema", localidade: "Fortaleza", uf: "CE" },
+                { cep: "69005040", logradouro: "Rua Barroso", bairro: "Centro", localidade: "Manaus", uf: "AM" },
+                { cep: "66013000", logradouro: "Avenida Portugal", bairro: "Campina", localidade: "Belém", uf: "PA" },
+                { cep: "50010000", logradouro: "Avenida Rio Branco", bairro: "Bairro do Recife", localidade: "Recife", uf: "PE" },
+                { cep: "57020000", logradouro: "Rua do Livramento", bairro: "Centro", localidade: "Maceió", uf: "AL" },
+                { cep: "59010000", logradouro: "Avenida Deodoro da Fonseca", bairro: "Cidade Alta", localidade: "Natal", uf: "RN" },
+                { cep: "58010000", logradouro: "Avenida João Pessoa", bairro: "Centro", localidade: "João Pessoa", uf: "PB" },
+                { cep: "65010000", logradouro: "Rua de Santana", bairro: "Centro", localidade: "São Luís", uf: "MA" },
+                { cep: "64000000", logradouro: "Avenida Frei Serafim", bairro: "Centro", localidade: "Teresina", uf: "PI" },
+                { cep: "49010000", logradouro: "Rua João Pessoa", bairro: "Centro", localidade: "Aracaju", uf: "SE" },
+                { cep: "68900000", logradouro: "Avenida FAB", bairro: "Centro", localidade: "Macapá", uf: "AP" }
+            ],
+            CENTRO_OESTE: [
+                { cep: "70040010", logradouro: "Esplanada dos Ministérios", bairro: "Zona Cívico-Administrativa", localidade: "Brasília", uf: "DF" },
+                { cep: "74003010", logradouro: "Praça Cívica", bairro: "Setor Central", localidade: "Goiânia", uf: "GO" },
+                { cep: "78005000", logradouro: "Avenida Getúlio Vargas", bairro: "Centro", localidade: "Cuiabá", uf: "MT" },
+                { cep: "79002000", logradouro: "Avenida Afonso Pena", bairro: "Centro", localidade: "Campo Grande", uf: "MS" },
+                { cep: "74015010", logradouro: "Avenida Anhanguera", bairro: "Setor Oeste", localidade: "Goiânia", uf: "GO" },
+                { cep: "78015000", logradouro: "Rua Barão de Melgaço", bairro: "Centro Sul", localidade: "Cuiabá", uf: "MT" }
+            ],
+            SUL_SUDESTE: [
+                { cep: "01310100", logradouro: "Avenida Paulista", bairro: "Bela Vista", localidade: "São Paulo", uf: "SP" },
+                { cep: "20040002", logradouro: "Avenida Rio Branco", bairro: "Centro", localidade: "Rio de Janeiro", uf: "RJ" },
+                { cep: "30140061", logradouro: "Rua dos Aimorés", bairro: "Funcionários", localidade: "Belo Horizonte", uf: "MG" },
+                { cep: "80010010", logradouro: "Rua XV de Novembro", bairro: "Centro", localidade: "Curitiba", uf: "PR" },
+                { cep: "90010001", logradouro: "Avenida Mauá", bairro: "Centro Histórico", localidade: "Porto Alegre", uf: "RS" },
+                { cep: "29010000", logradouro: "Avenida Jerônimo Monteiro", bairro: "Centro", localidade: "Vitória", uf: "ES" },
+                { cep: "88010000", logradouro: "Rua Felipe Schmidt", bairro: "Centro", localidade: "Florianópolis", uf: "SC" },
+                { cep: "04538133", logradouro: "Avenida Brigadeiro Faria Lima", bairro: "Itaim Bibi", localidade: "São Paulo", uf: "SP" },
+                { cep: "22021001", logradouro: "Avenida Atlântica", bairro: "Copacabana", localidade: "Rio de Janeiro", uf: "RJ" },
+                { cep: "30130010", logradouro: "Avenida Afonso Pena", bairro: "Centro", localidade: "Belo Horizonte", uf: "MG" },
+                { cep: "80020010", logradouro: "Praça Tiradentes", bairro: "Centro", localidade: "Curitiba", PR: "PR" }
+            ]
+        };
 
         function toggleTheme() {
             const body = document.body;
@@ -325,30 +386,76 @@
 
         function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-        function generateEmail(nome) {
-            const clean = nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '.');
-            return `${clean}${Math.floor(Math.random()*99)}@${getRandom(dominios)}`;
-        }
-
-        async function generateOne() {
-            const baseEnd = getRandom(baseEnderecos);
+        async function generateOne(usedSets, regiao) {
             let item = { id: Date.now() + Math.random(), tipo: mode };
             
+            let poolEnderecos = [];
+            if (regiao === 'TODAS') {
+                poolEnderecos = [...baseEnderecos.NORTE_NORDESTE, ...baseEnderecos.CENTRO_OESTE, ...baseEnderecos.SUL_SUDESTE];
+            } else {
+                poolEnderecos = baseEnderecos[regiao] || [];
+            }
+            const baseEnd = getRandom(poolEnderecos);
+
+            const maxAttempts = 100;
+            let nomeGerado = "";
+            let fantasiaGerada = "";
+            let docGerado = "";
+
             if(mode === 'PF') {
-                item.nome = getRandom(nomes) + " " + getRandom(sobrenomes) + " " + getRandom(sobrenomes);
-                item.documento = getCPF();
+                let attempts = 0;
+                do {
+                    nomeGerado = getRandom(nomes) + " " + getRandom(sobrenomes) + " " + getRandom(sobrenomes);
+                    attempts++;
+                } while (usedSets.nomes.has(nomeGerado) && attempts < maxAttempts);
+                usedSets.nomes.add(nomeGerado);
+                item.nome = nomeGerado;
+
+                attempts = 0;
+                do {
+                    docGerado = getCPF();
+                    attempts++;
+                } while (usedSets.documentos.has(docGerado) && attempts < maxAttempts);
+                usedSets.documentos.add(docGerado);
+                item.documento = docGerado;
+
                 item.rg = `${Math.floor(Math.random()*99)}.${Math.floor(Math.random()*999)}.${Math.floor(Math.random()*999)}-${Math.floor(Math.random()*9)}`;
             } else {
-                item.fantasia = getRandom(empresasPrefix) + " " + getRandom(empresasSuffix);
-                item.nome = item.fantasia + " " + getRandom(["LTDA", "S.A.", "MEI"]);
-                item.documento = getCNPJ();
+                let attempts = 0;
+                do {
+                    fantasiaGerada = getRandom(empresasPrefix) + " " + getRandom(empresasSuffix);
+                    nomeGerado = fantasiaGerada + " " + getRandom(["LTDA", "S.A.", "MEI"]);
+                    attempts++;
+                } while ((usedSets.nomes.has(nomeGerado) || usedSets.fantasias.has(fantasiaGerada)) && attempts < maxAttempts);
+                usedSets.nomes.add(nomeGerado);
+                usedSets.fantasias.add(fantasiaGerada);
+                item.fantasia = fantasiaGerada;
+                item.nome = nomeGerado;
+
+                attempts = 0;
+                do {
+                    docGerado = getCNPJ();
+                    attempts++;
+                } while (usedSets.documentos.has(docGerado) && attempts < maxAttempts);
+                usedSets.documentos.add(docGerado);
+                item.documento = docGerado;
+
                 item.ie = Math.floor(Math.random()*999999999).toString();
             }
 
-            item.email = generateEmail(item.nome.split(' ')[0] + (item.fantasia ? '' : ' ' + item.nome.split(' ')[1]));
+            let emailGerado = "";
+            let emailAttempts = 0;
+            do {
+                const clean = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9.]/g, "").replace(/\s+/g, '.');
+                const suffix = emailAttempts > 0 ? Math.floor(Math.random()*999) : Math.floor(Math.random()*99);
+                emailGerado = `${clean.substring(0, 20)}${suffix}@${getRandom(dominios)}`;
+                emailAttempts++;
+            } while (usedSets.emails.has(emailGerado) && emailAttempts < maxAttempts);
+            usedSets.emails.add(emailGerado);
+            item.email = emailGerado;
+
             item.telefone = getPhone();
             
-            // Endereço Detalhado
             item.cep = baseEnd.cep;
             item.logradouro = baseEnd.logradouro;
             item.numero = Math.floor(Math.random() * 2000) + 1;
@@ -361,12 +468,20 @@
 
         async function generateBatch() {
             const qty = parseInt(document.getElementById('qty').value) || 1;
+            const regiao = document.getElementById('regiao').value || 'TODAS';
             const container = document.getElementById('results-container');
             container.innerHTML = "Gerando...";
             currentData = [];
 
+            const usedSets = {
+                nomes: new Set(),
+                fantasias: new Set(),
+                documentos: new Set(),
+                emails: new Set()
+            };
+
             for(let i=0; i<qty; i++) {
-                currentData.push(await generateOne());
+                currentData.push(await generateOne(usedSets, regiao));
             }
 
             renderResults();
@@ -382,8 +497,11 @@
                 return;
             }
 
+            // MODIFICADO: Adicionado botão de exclusão individual no canto superior direito do data-item
             container.innerHTML = currentData.map(item => `
-                <div class="data-item">
+                <div class="data-item" style="position: relative;">
+                    <button onclick="deleteSingleData(${item.id})" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; cursor: pointer; font-size: 1rem;" title="Remover item">❌</button>
+                    
                     <div class="field" onclick="copy('${item.nome}')">
                         <label>${item.tipo === 'PF' ? 'Nome Completo' : 'Razão Social'}</label>
                         <span style="font-weight: 700; color: var(--primary); font-size: 1rem;">${item.nome}</span>
@@ -446,6 +564,45 @@
             `).join('');
         }
 
+        // NOVO: Função para excluir um único item da visualização
+        function deleteSingleData(id) {
+            // 1. Remove o item da tela
+            currentData = currentData.filter(item => item.id !== id);
+            renderResults();
+
+            // 2. Atualiza o registro correspondente no localStorage (Histórico)
+            let history = JSON.parse(localStorage.getItem('sinte_history') || '[]');
+            
+            if (history.length > 0) {
+                // Encontra a versão do lote atual no histórico pelo ID de algum item restante 
+                // ou assume que as alterações estão sendo feitas no lote mais recente (posição 0)
+                let currentBatchIndex = 0; 
+                
+                if (currentData.length > 0) {
+                    // Se ainda restam itens, atualiza os dados daquele lote e a quantidade
+                    history[currentBatchIndex].data = currentData;
+                    history[currentBatchIndex].qty = currentData.length;
+                } else {
+                    // Se não sobrou nenhum item no card (era PF(1) ou você apagou todos um por um), remove a linha do histórico
+                    history.splice(currentBatchIndex, 1);
+                }
+
+                // Salva de volta no localStorage e atualiza o visual da sidebar
+                localStorage.setItem('sinte_history', JSON.stringify(history));
+                loadSidebarHistory();
+            }
+        }
+
+        // NOVO: Função para limpar armazenamento do histórico e resetar a tela
+        function clearAllData() {
+            if(confirm("Deseja realmente limpar a tela e apagar todo o histórico do armazenamento?")) {
+                currentData = [];
+                localStorage.removeItem('sinte_history');
+                renderResults();
+                loadSidebarHistory();
+            }
+        }
+
         function updateHistory() {
             const history = JSON.parse(localStorage.getItem('sinte_history') || '[]');
             const newEntry = { 
@@ -457,8 +614,17 @@
             history.unshift(newEntry);
             const limited = history.slice(0, 5);
             localStorage.setItem('sinte_history', JSON.stringify(limited));
-            
-            document.getElementById('history-list').innerHTML = limited.map((h, idx) => `
+            loadSidebarHistory();
+        }
+
+        // MODIFICADO: Isolado em uma função para atualizar a barra lateral ao limpar tudo
+        function loadSidebarHistory() {
+            const history = JSON.parse(localStorage.getItem('sinte_history') || '[]');
+            if(history.length === 0) {
+                document.getElementById('history-list').innerHTML = 'Nenhum registro';
+                return;
+            }
+            document.getElementById('history-list').innerHTML = history.map((h, idx) => `
                 <div style="padding: 8px; border-bottom: 1px solid #334155; cursor: pointer;" onclick="loadHistory(${idx})">
                     ${h.time} - ${h.tipo} (${h.qty})
                 </div>
@@ -467,8 +633,10 @@
 
         function loadHistory(idx) {
             const history = JSON.parse(localStorage.getItem('sinte_history') || '[]');
-            currentData = history[idx].data;
-            renderResults();
+            if(history[idx]) {
+                currentData = history[idx].data;
+                renderResults();
+            }
         }
 
         function copy(txt) {
@@ -504,6 +672,9 @@
             a.download = filename;
             a.click();
         }
+
+        // Carrega o histórico ao iniciar o app
+        loadSidebarHistory();
     </script>
 </body>
 </html>
